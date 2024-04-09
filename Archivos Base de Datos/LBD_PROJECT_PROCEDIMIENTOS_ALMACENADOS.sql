@@ -1,9 +1,9 @@
 --Archivo para realizar SP dentro de la DB
 
 
---Manipulaci�n de los m�todos de pago
+--Manipulaci�n de los m�todos de pago
 
---Inserci�n de los metodos de pago
+--Inserci�n de los metodos de pago
 SET SERVEROUTPUT ON;
 CREATE OR REPLACE PROCEDURE INSERTAR_METODOPAGO(
     id_metodo METODO_PAGO_TB.ID_METODO_PAGO%TYPE,
@@ -41,9 +41,9 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('No se encontraron datos');
 END;
 
-EXECUTE INSERTAR_METODOPAGO(2,'Efectivo','Pago con d�lares')--Prueba de inserci�n
+EXECUTE INSERTAR_METODOPAGO(2,'Efectivo','Pago con d�lares')--Prueba de inserci�n
 
---Procedimeinto para el Borrado de los m�todos de pago
+--Procedimeinto para el Borrado de los m�todos de pago
 
 CREATE OR REPLACE PROCEDURE ELIMINAR_METODOPAGO(id_metodo METODO_PAGO_TB.ID_METODO_PAGO%TYPE)
 AS
@@ -142,7 +142,7 @@ exec ACTUALIZAR_METODO_PAGO(2,'Tarjeta de Credito',  'Banco Nacional');
 
 ----Manipulacion de facturas
 
---Creaci�n de una factura
+--Creaci�n de una factura
 
 
 CREATE OR REPLACE PROCEDURE INSERTAR_FACTURA(
@@ -210,7 +210,7 @@ BEGIN
         -- Realizar un commit para hacer permanentes los cambios
         COMMIT;
         
-        -- Mensaje de �xito
+        -- Mensaje de �xito
         DBMS_OUTPUT.PUT_LINE('Factura eliminada correctamente');
     ELSE
         DBMS_OUTPUT.PUT_LINE('No se encontraron datos');
@@ -284,61 +284,45 @@ CREATE OR REPLACE PROCEDURE ELIMINAR_VENTA(
 BEGIN
     DELETE FROM historial_ventas
     WHERE id_venta = id_venta;
-    COMMIT;
+    COMMIT;1020Saul
 END;
 
 
 --Procedimientos para pedidos 
 
+-- Gestion pedidos clientes
+/* ================================= Inicio Create ================================= */  
 CREATE OR REPLACE PROCEDURE INSERTAR_PEDIDO_CLIENTE(
-    id_pedido_cliente PEDIDO_CLIENTE_TB.ID_PEDIDO_CLIENTE%TYPE,
+    idPedidoCliente PEDIDO_CLIENTE_TB.ID_PEDIDO_CLIENTE%TYPE,
     id_factura PEDIDO_CLIENTE_TB.ID_FACTURA%TYPE,
     id_direccion PEDIDO_CLIENTE_TB.ID_DIRECCION%TYPE,
     id_cliente PEDIDO_CLIENTE_TB.ID_CLIENTE%TYPE,
     estado_pedido PEDIDO_CLIENTE_TB.ESTADO_PEDIDO%TYPE
 )     
 AS
-    validar BOOLEAN;
     cantidad NUMBER;
 BEGIN
-    SELECT COUNT(*) INTO cantidad
-    FROM PEDIDO_CLIENTE_TB
-    WHERE ID_PEDIDO_CLIENTE = id_pedido_cliente;
-    
-    IF cantidad > 0 THEN
-        validar := TRUE;
-    ELSE
-        validar := FALSE;
-    END IF;
-    
-    -- Validar el id
-    IF validar = FALSE THEN
-        -- Si el registro no existe, se inserta uno nuevo
+    SELECT COUNT(*) INTO cantidad FROM PEDIDO_CLIENTE_TB WHERE ID_PEDIDO_CLIENTE = idPedidoCliente;
+
+    IF cantidad=0 THEN
         INSERT INTO PEDIDO_CLIENTE_TB(ID_PEDIDO_CLIENTE, ID_FACTURA, ID_DIRECCION, ID_CLIENTE, ESTADO_PEDIDO)
-        VALUES(id_pedido_cliente, id_factura, id_direccion, id_cliente, estado_pedido);
+        VALUES(idPedidoCliente, id_factura, id_direccion, id_cliente, estado_pedido);
         COMMIT;
-        DBMS_OUTPUT.PUT_LINE('Se ha insertado correctamente un registro con el ID de pedido cliente: ' || id_pedido_cliente);
+        DBMS_OUTPUT.PUT_LINE('Se ha insertado correctamente un registro con el ID de pedido cliente: ' || idPedidoCliente);
     ELSE
-        DBMS_OUTPUT.PUT_LINE('Ya existe un registro con el ID de pedido cliente: ' || id_pedido_cliente);
+        -- Si el registro ya existe, mostrar un mensaje
+        DBMS_OUTPUT.PUT_LINE('Ya existe un registro con el ID de pedido cliente: ' || idPedidoCliente);
     END IF;
 END;
-/
 
--- Prueba de Ingresar,  se cambia solo el ID ya que los dem?s datos son de otras tablas
 BEGIN
-    INSERTAR_PEDIDO_CLIENTE(30000, 100000, 100000, 10000, 'En espera');
+    INSERTAR_PEDIDO_CLIENTE(30000, 23002, 4002, 5002, 'En espera');
 END;
-/
 
--- Ver la tabla de (PEDIDO_CLIENTE_TB)
 SELECT * FROM PEDIDO_CLIENTE_TB;
 /* ================================= Fin Create ================================= */  
 
-
-/* ================================= Inicio Update ================================= */
-
--- En esta parte solo se actualzia el estado del pedido
-
+/* ================================= Inicio Update ================================= */  
 CREATE OR REPLACE PROCEDURE ACTUALIZAR_ESTADO_PEDIDO(
     id_pedido_cliente_in PEDIDO_CLIENTE_TB.ID_PEDIDO_CLIENTE%TYPE,
     nuevo_estado_pedido_in PEDIDO_CLIENTE_TB.ESTADO_PEDIDO%TYPE
@@ -372,24 +356,19 @@ EXCEPTION
     WHEN NO_DATA_FOUND THEN
         DBMS_OUTPUT.PUT_LINE('No se encontraron datos.');
 END;
-/
 
 -- Prueba de actualizar el pedido ingresando el id de la tabla (ID_CLIENTE_PEDIDO) y cambiendo el estado en este caso "En proceso" 
 BEGIN
     ACTUALIZAR_ESTADO_PEDIDO(30000, 'En proceso');
 END;
-/
 
 -- Ver la tabla de (PEDIDO_CLIENTE_TB)
 SELECT * FROM PEDIDO_CLIENTE_TB;
-/
-/* ================================= Fin Update ================================= */
+/* ================================= Fin Update ================================= */  
 
-
-
-/* ================================= Inicio Delete ================================= */
+/* ================================= Inicio Delete ================================= */  
 CREATE OR REPLACE PROCEDURE ELIMINAR_PEDIDO_CLIENTE(
-    id_pedido_cliente PEDIDO_CLIENTE_TB.ID_PEDIDO_CLIENTE%TYPE
+    idPedidoCliente PEDIDO_CLIENTE_TB.ID_PEDIDO_CLIENTE%TYPE
 )
 AS
     validar BOOLEAN;
@@ -398,7 +377,7 @@ BEGIN
     -- Verificar la existencia del registro con el ID proporcionado
     SELECT COUNT(*) INTO cantidad
     FROM PEDIDO_CLIENTE_TB
-    WHERE ID_PEDIDO_CLIENTE = id_pedido_cliente;
+    WHERE ID_PEDIDO_CLIENTE = idPedidoCliente;
     
     -- Validar la existencia del registro
     IF cantidad > 0 THEN
@@ -410,19 +389,307 @@ BEGIN
     -- Si existe un registro, realizar el borrado
     IF validar = TRUE THEN
         DELETE FROM PEDIDO_CLIENTE_TB
-        WHERE ID_PEDIDO_CLIENTE = id_pedido_cliente;
+        WHERE ID_PEDIDO_CLIENTE = idPedidoCliente;
         COMMIT;
-        DBMS_OUTPUT.PUT_LINE('El pedido del cliente se elimin? correctamente.');
+        DBMS_OUTPUT.PUT_LINE('El pedido del cliente se eliminó correctamente.');
     ELSE
         DBMS_OUTPUT.PUT_LINE('No se encontraron datos.');
     END IF;
 EXCEPTION
-    -- Capturar cualquier excepci?n y mostrar un mensaje de error
+    -- Capturar cualquier excepción y mostrar un mensaje de error
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Hubo un error al eliminar el pedido: ' || SQLERRM);
 END ELIMINAR_PEDIDO_CLIENTE;
 
+-- Prueba de eliminar, en este caso solo se ingresa el id de la tabla (ID_CLIENTE_PEDIDO)
+BEGIN
+    ELIMINAR_PEDIDO_CLIENTE(30000);
+END;
 
+-- Ver la tabla de (PEDIDO_CLIENTE_TB)
+SELECT * FROM PEDIDO_CLIENTE_TB;
+/* ================================= Fin Delete ================================= */
+
+-- Gestion Clientes
+/* ================================= Inicio Create ================================= */
+SET SERVEROUTPUT ON;
+CREATE OR REPLACE PROCEDURE INSERTAR_CLIENTE(
+    idCliente CLIENTE_TB.ID_CLIENTE%TYPE,
+    nombre_cliente CLIENTE_TB.NOMBRE_CLIENTE%TYPE,
+    primer_apellido CLIENTE_TB.PRIMER_APELLIDO%TYPE,
+    segundo_apellido CLIENTE_TB.SEGUNDO_APELLIDO%TYPE,
+    numero_cedula CLIENTE_TB.NUMERO_CEDULA%TYPE,
+    edad CLIENTE_TB.EDAD%TYPE,
+    genero CLIENTE_TB.GENERO%TYPE,
+    id_direccion CLIENTE_TB.ID_DIRECCION%TYPE
+)     
+AS
+    validar BOOLEAN;
+    cantidad NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO cantidad
+    FROM CLIENTE_TB
+    WHERE ID_CLIENTE = idCliente;
+    
+    IF cantidad = 0 THEN
+        validar := FALSE;
+    ELSE
+        validar := TRUE;
+    END IF;
+    
+    -- Validar el id
+    IF validar = FALSE THEN
+        -- Si el registro no existe, se inserta uno nuevo
+        INSERT INTO CLIENTE_TB(ID_CLIENTE, NOMBRE_CLIENTE, PRIMER_APELLIDO, SEGUNDO_APELLIDO, NUMERO_CEDULA, EDAD, GENERO, ID_DIRECCION)
+        VALUES(idCliente, nombre_cliente, primer_apellido, segundo_apellido, numero_cedula, edad, genero, id_direccion);
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Se ha insertado correctamente un cliente con ID: ' || idCliente);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Ya existe un cliente con ID: ' || idCliente);
+    END IF;
+END;
+
+// Cambiar todo los datos menos la direccion
+BEGIN
+    INSERTAR_CLIENTE(5004, 'Juan', 'Perez', 'Gomez', 119472615, 30, 'Masculino', 4002);
+END;
+
+SELECT * FROM cliente_tb
+/* ================================= Fin Create ================================= */
+
+/* ================================= Inicio Update ================================= */
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_CLIENTE(
+    id_cliente_in CLIENTE_TB.ID_CLIENTE%TYPE,
+    nombre_cliente_in CLIENTE_TB.NOMBRE_CLIENTE%TYPE,
+    primer_apellido_in CLIENTE_TB.PRIMER_APELLIDO%TYPE,
+    segundo_apellido_in CLIENTE_TB.SEGUNDO_APELLIDO%TYPE,
+    numero_cedula_in CLIENTE_TB.NUMERO_CEDULA%TYPE,
+    edad_in CLIENTE_TB.EDAD%TYPE,
+    genero_in CLIENTE_TB.GENERO%TYPE,
+    id_direccion_in CLIENTE_TB.ID_DIRECCION%TYPE
+)
+AS
+    contador NUMBER;
+    verificar BOOLEAN;
+BEGIN
+    -- Verificar si el cliente existe
+    SELECT COUNT(*) INTO contador
+    FROM CLIENTE_TB
+    WHERE ID_CLIENTE = id_cliente_in;
+    
+    IF contador = 0 THEN
+        verificar := FALSE;
+    ELSIF contador = 1 THEN
+        verificar := TRUE;
+    END IF;
+    
+    IF verificar = TRUE THEN
+        -- Actualizar los datos del cliente
+        UPDATE CLIENTE_TB
+        SET NOMBRE_CLIENTE = nombre_cliente_in,
+            PRIMER_APELLIDO = primer_apellido_in,
+            SEGUNDO_APELLIDO = segundo_apellido_in,
+            NUMERO_CEDULA = numero_cedula_in,
+            EDAD = edad_in,
+            GENERO = genero_in,
+            ID_DIRECCION = id_direccion_in
+        WHERE ID_CLIENTE = id_cliente_in;
+        
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Los datos del cliente se actualizaron correctamente.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('No existe ningún cliente con el in ingresado ID.');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No se encontraron datos.');
+END;
+
+BEGIN
+    ACTUALIZAR_CLIENTE(5003, 'Paul', 'Serrano', 'Salas', 118920171, 20, 'Masculino', 4001);
+END;
+
+SELECT * FROM cliente_tb
+/* ================================= Fin Update================================= */
+
+/* ================================= Inicio Delete ================================= */
+CREATE OR REPLACE PROCEDURE ELIMINAR_CLIENTE(
+    idCliente CLIENTE_TB.ID_CLIENTE%TYPE
+)
+AS
+    validar BOOLEAN;
+    cantidad NUMBER;
+BEGIN
+    -- Verificar la existencia del cliente con el ID proporcionado
+    SELECT COUNT(*) INTO cantidad
+    FROM CLIENTE_TB
+    WHERE ID_CLIENTE = idCliente;
+    
+    -- Validar la existencia del cliente
+    IF cantidad > 0 THEN
+        validar := TRUE;
+    ELSE
+        validar := FALSE;
+    END IF;
+    
+    -- Si existe el cliente, se elimina
+    IF validar = TRUE THEN
+        DELETE FROM CLIENTE_TB
+        WHERE ID_CLIENTE = idCliente;
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('El cliente se eliminó correctamente.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('No se encontraron datos para eliminar.');
+    END IF;
+EXCEPTION
+    -- Capturar cualquier excepción y mostrar un mensaje de error
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Hubo un error al eliminar el cliente: ' || SQLERRM);
+END ELIMINAR_CLIENTE;
+
+-- Prueba de eliminar un cliente
+BEGIN
+    ELIMINAR_CLIENTE(5004);
+END;
+
+-- Ver la tabla de CLIENTE_TB para verificar los cambios
+SELECT * FROM CLIENTE_TB;
+/* ================================= Fin Delete ================================= */
+
+-- Gestion Proveedores
+/* ================================= Inicio Create ================================= */
+SET SERVEROUTPUT ON;
+CREATE OR REPLACE PROCEDURE INSERTAR_PROVEEDOR(
+    idProveedor PROVEEDOR_TB.ID_PROVEEDOR%TYPE,
+    nombre_empresa PROVEEDOR_TB.NOMBRE_EMPRESA%TYPE,
+    persona_contacto PROVEEDOR_TB.PERSONA_CONTACTO%TYPE,
+    tipo_proveedor PROVEEDOR_TB.TIPO_PROVEEDOR%TYPE,
+    id_direccion PROVEEDOR_TB.ID_DIRECCION%TYPE
+)     
+AS
+    validar BOOLEAN;
+    cantidad NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO cantidad
+    FROM PROVEEDOR_TB
+    WHERE ID_PROVEEDOR = idProveedor;
+    
+    IF cantidad = 0 THEN
+        validar := FALSE;
+    ELSE
+        validar := TRUE;
+    END IF;
+    
+    -- Validar el ID
+    IF validar = FALSE THEN
+        -- Si el registro no existe, se inserta uno nuevo
+        INSERT INTO PROVEEDOR_TB(ID_PROVEEDOR, NOMBRE_EMPRESA, PERSONA_CONTACTO, TIPO_PROVEEDOR, ID_DIRECCION)
+        VALUES(idProveedor, nombre_empresa, persona_contacto, tipo_proveedor, id_direccion);
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Se ha insertado correctamente un proveedor con ID: ' || idProveedor);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Ya existe un proveedor con ID: ' || idProveedor);
+    END IF;
+END;
+
+BEGIN
+    INSERTAR_PROVEEDOR(12003, 'Proveedor 123', 'Maria Sanchez', 'Electrodomésticos', 4000);
+END;
+
+SELECT * FROM PROVEEDOR_TB;
+/* ================================= Fin Create ================================= */
+
+/* ================================= Inicio Update ================================= */
+CREATE OR REPLACE PROCEDURE ACTUALIZAR_PROVEEDOR(
+    id_proveedor_in PROVEEDOR_TB.ID_PROVEEDOR%TYPE,
+    nombre_empresa_in PROVEEDOR_TB.NOMBRE_EMPRESA%TYPE,
+    persona_contacto_in PROVEEDOR_TB.PERSONA_CONTACTO%TYPE,
+    tipo_proveedor_in PROVEEDOR_TB.TIPO_PROVEEDOR%TYPE,
+    id_direccion_in PROVEEDOR_TB.ID_DIRECCION%TYPE
+)
+AS
+    contador NUMBER;
+    verificar BOOLEAN;
+BEGIN
+    -- Verificar si el proveedor existe
+    SELECT COUNT(*) INTO contador
+    FROM PROVEEDOR_TB
+    WHERE ID_PROVEEDOR = id_proveedor_in;
+    
+    IF contador = 0 THEN
+        verificar := FALSE;
+    ELSIF contador = 1 THEN
+        verificar := TRUE;
+    END IF;
+    
+    IF verificar = TRUE THEN
+        -- Actualizar los datos del proveedor
+        UPDATE PROVEEDOR_TB
+        SET NOMBRE_EMPRESA = nombre_empresa_in,
+            PERSONA_CONTACTO = persona_contacto_in,
+            TIPO_PROVEEDOR = tipo_proveedor_in,
+            ID_DIRECCION = id_direccion_in
+        WHERE ID_PROVEEDOR = id_proveedor_in;
+        
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Los datos del proveedor se actualizaron correctamente.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('No existe ningún proveedor con el ID ingresado.');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No se encontraron datos.');
+END;
+
+BEGIN
+    ACTUALIZAR_PROVEEDOR(12003, 'Proveedores SA', 'asdfasdfasdf Perez', 'sdfgsdfg', 4001);
+END;
+
+SELECT * FROM PROVEEDOR_TB;
+/* ================================= Fin Update ================================= */
+
+/* ================================= Inicio Delete ================================= */
+CREATE OR REPLACE PROCEDURE ELIMINAR_PROVEEDOR(
+    idProveedor PROVEEDOR_TB.ID_PROVEEDOR%TYPE
+)
+AS
+    validar BOOLEAN;
+    cantidad NUMBER;
+BEGIN
+    -- Verificar la existencia del proveedor con el ID proporcionado
+    SELECT COUNT(*) INTO cantidad
+    FROM PROVEEDOR_TB
+    WHERE ID_PROVEEDOR = idProveedor;
+    
+    -- Validar la existencia del proveedor
+    IF cantidad > 0 THEN
+        validar := TRUE;
+    ELSE
+        validar := FALSE;
+    END IF;
+    
+    -- Si existe el proveedor, se elimina
+    IF validar = TRUE THEN
+        DELETE FROM PROVEEDOR_TB
+        WHERE ID_PROVEEDOR = idProveedor;
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('El proveedor se eliminó correctamente.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('No se encontraron datos para eliminar.');
+    END IF;
+EXCEPTION
+    -- Capturar cualquier excepción y mostrar un mensaje de error
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Hubo un error al eliminar el proveedor: ' || SQLERRM);
+END ELIMINAR_PROVEEDOR;
+
+
+BEGIN
+    ELIMINAR_PROVEEDOR(12003);
+END;
+
+SELECT * FROM PROVEEDOR_TB;
+/* ================================= Fin Delete ================================= */
 
 --Procedimientos para prductos
 
